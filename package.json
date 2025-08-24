@@ -1,0 +1,23 @@
+{
+  "name": "simple-pwdk-playwright",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aldifhrent/pos-pwdk-playwright.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/aldifhrent/pos-pwdk-playwright/issues"
+  },
+  "homepage": "https://github.com/aldifhrent/pos-pwdk-playwright#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/node": "^24.3.0"
+  }
+}
