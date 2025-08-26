@@ -7,14 +7,17 @@ export class LoginPage {
   readonly passwordInput;
   readonly loginButton;
   readonly errorMessage;
+  readonly dashboardTitle;
 
   constructor(page: Page) {
     this.page = page;
-    
     this.emailInput = page.locator('input[type="email"]');
     this.passwordInput = page.locator('input[type="password"]');
     this.loginButton = page.locator('button[type="submit"]');
     this.errorMessage = page.getByText("Invalid Credentials");
+    this.dashboardTitle = page.locator("h1.text-2xl.font-bold", {
+      hasText: "POS System",
+    });
   }
 
   async login(email: string, password: string) {
@@ -25,6 +28,14 @@ export class LoginPage {
 
   getErrorMessage() {
     return this.errorMessage;
+  }
+
+  getDashboardTitle() {
+    return this.dashboardTitle;
+  }
+
+  async submitBypassValidation() {
+    await this.page.$eval("form", (form: HTMLFormElement) => form.submit());
   }
 
   async getValidationMessage(input: "email" | "password") {
