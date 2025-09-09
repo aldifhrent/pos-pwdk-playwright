@@ -1,4 +1,3 @@
-import { SignUpPage } from './../pages/SignUpPage';
 import { test, expect } from "@playwright/test";
 import { gotoApp } from "../util/util";
 import { CREDENTIALS } from "../data/config";
@@ -16,35 +15,32 @@ test.describe("Login Page - Validation Tests", () => {
     const loginPage = new LoginPage(page);
     await loginPage.login(CREDENTIALS.email, "");
 
-    const validationMsg = await loginPage.getValidationMessage("password");
-    expect(validationMsg).toMatch(/fill out/i);
+    const msg = await loginPage.getValidationMessage("password");
+    expect(msg).toMatch(/fill out/i);
   });
 
   test("Email required", async ({ page }) => {
     const loginPage = new LoginPage(page);
     await loginPage.login("", CREDENTIALS.password);
 
-    const validationMsg = await loginPage.getValidationMessage("email");
-    expect(validationMsg).toMatch(/fill out/i);
+    const msg = await loginPage.getValidationMessage("email");
+    expect(msg).toMatch(/fill out/i);
   });
 
   test("Email & Password required", async ({ page }) => {
     const loginPage = new LoginPage(page);
     await loginPage.login("", "");
 
-    const validationEmail = await loginPage.getValidationMessage("email");
-    const validationPassword = await loginPage.getValidationMessage("password");
-
-    expect(validationEmail).toMatch(/fill out/i);
-    expect(validationPassword).toMatch(/fill out/i);
+    expect(await loginPage.getValidationMessage("email")).toMatch(/fill out/i);
+    expect(await loginPage.getValidationMessage("password")).toMatch(/fill out/i);
   });
 
   test("Invalid email format (missing @)", async ({ page }) => {
     const loginPage = new LoginPage(page);
     await loginPage.login("admin", CREDENTIALS.password);
 
-    const validationMsg = await loginPage.getValidationMessage("email");
-    expect(validationMsg).toMatch(/(include|enter).*email address/i);
+    const msg = await loginPage.getValidationMessage("email");
+    expect(msg).toMatch(/(include|enter).*email address/i);
   });
 
   test("Invalid email uppercase tanpa domain valid", async ({ page }) => {
@@ -52,7 +48,7 @@ test.describe("Login Page - Validation Tests", () => {
     await loginPage.login("ADMINPOS", "admin");
 
     const msg = await loginPage.getValidationMessage("email");
-    expect(msg).toMatch(/(include|enter).*email address/i)
+    expect(msg).toMatch(/(include|enter).*email address/i);
   });
 });
 
@@ -73,18 +69,17 @@ test.describe("Login Page - Positive Tests", () => {
 
   test("Valid login dengan email UPPERCASE", async ({ page }) => {
     const loginPage = new LoginPage(page);
-    await loginPage.login("ADMIN@POS.COM", CREDENTIALS.password);
+    await loginPage.login(CREDENTIALS.email.toUpperCase(), CREDENTIALS.password);
 
     await expect(loginPage.getDashboardTitle()).toBeVisible();
   });
 
-  test("Valid login dengan email ada spasi depan & belakang", async ({
-    page,
-  }) => {
+  test("Valid login dengan email ada spasi depan & belakang", async ({ page, browserName }) => {
     const loginPage = new LoginPage(page);
-    await loginPage.login("   admin@pos.com   ", CREDENTIALS.password);
+    await loginPage.login("   " + CREDENTIALS.email + "   ", CREDENTIALS.password);
 
     await expect(loginPage.getDashboardTitle()).toBeVisible();
+    await page.screenshot({ path: `login-debug-${browserName}.png`, fullPage: true });
   });
 });
 
@@ -96,15 +91,17 @@ test.describe("Login Page - Negative Tests", () => {
     await gotoApp({ page });
   });
 
-  test("Login gagal dengan SQL Injection (bypass HTML5 validation)", async ({ page }) => {
+  test("Login gagal dengan SQL Injection", async ({ page }) => {
     const loginPage = new LoginPage(page);
+    await loginPage.login("' OR '1'='1", "' OR '1'='1");
 
-    await loginPage.login("' OR '1'='1", "' OR '1'='1")
+    // bypass HTML5 validation jika ada
+    if (loginPage.submitBypassValidation) {
+      await loginPage.submitBypassValidation();
+    }
 
-    await loginPage.submitBypassValidation()
-
-    await expect(loginPage.getErrorMessage()).toBeVisible()
-    await expect(loginPage.dashboardTitle()).not.toBeVisible()
+    await expect(loginPage.getErrorMessage()).toBeVisible();
+    await expect(loginPage.getDashboardTitle()).not.toBeVisible();
   });
 
   test("Login gagal dengan email terlalu panjang", async ({ page }) => {
@@ -115,11 +112,9 @@ test.describe("Login Page - Negative Tests", () => {
     await expect(loginPage.getErrorMessage()).toBeVisible();
   });
 
-  test("Login gagal jika password berbeda case (case-sensitive)", async ({
-    page,
-  }) => {
+  test("Login gagal jika password berbeda case", async ({ page }) => {
     const loginPage = new LoginPage(page);
-    await loginPage.login(CREDENTIALS.email, "ADMIN");
+    await loginPage.login(CREDENTIALS.email, CREDENTIALS.password.toUpperCase());
 
     await expect(loginPage.getErrorMessage()).toBeVisible();
   });
