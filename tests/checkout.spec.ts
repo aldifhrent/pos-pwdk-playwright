@@ -29,7 +29,7 @@ test.describe("Checkout Products", () => {
       await checkoutPage.checkoutFlow({
         name: "Aldi",
         email: "aldi@example.com",
-        payment, // konsisten dengan CheckoutPage
+        payment,
         notes: "Tolong kirim struk via email 🙏",
       });
 

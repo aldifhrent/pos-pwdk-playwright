@@ -79,7 +79,6 @@ test.describe("Login Page - Positive Tests", () => {
     await loginPage.login("   " + CREDENTIALS.email + "   ", CREDENTIALS.password);
 
     await expect(loginPage.getDashboardTitle()).toBeVisible();
-    await page.screenshot({ path: `login-debug-${browserName}.png`, fullPage: true });
   });
 });
 
